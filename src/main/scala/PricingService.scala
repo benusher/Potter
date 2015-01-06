@@ -1,26 +1,34 @@
 import scala.annotation.tailrec
 
 object PricingService {
-  private val price = 8
-  def price(basket: List[Int]): Double = {
-    totUp(0, basket, basket.size)
+  type Basket = List[Int]
+
+  def price(basket: Basket): Double = {
+    def discountedPrice(numberOfDifferentBooks: Int): BigDecimal = numberOfDifferentBooks match {
+      case 5 => price * 0.75
+      case 4 => price * 0.8
+      case 3 => price * 0.9
+      case 2 => price * 0.95
+      case _ => price * 1.0
+    }
+
+    totUp(0, 0, basket, basket.toSet.size, discountedPrice(basket.toSet.size))
   }
 
   @tailrec
-  def totUp(runningTotal: BigDecimal, basket: List[Int], numberOfDifferentBooks: Int) :Double = {
-    if(basket.isEmpty)
-      runningTotal.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+  def totUp(acc: Int, runningTotal: BigDecimal, basket: Basket, numberOfDifferentBooks: Int, reducedPrice: BigDecimal): Double = {
+    def getPrice: BigDecimal = if (numberOfDifferentBooks - acc > 0) reducedPrice else price
+
+    if (basket.isEmpty)
+      format(runningTotal)
     else {
-      val result: BigDecimal = ((basket.head - 1) * price) + (1 * discountedPrice(numberOfDifferentBooks))
-      totUp(runningTotal + result, basket.tail, numberOfDifferentBooks)
+      totUp(acc + 1, runningTotal + getPrice, basket.tail, numberOfDifferentBooks, reducedPrice)
     }
-  }
-  
-  def discountedPrice(numberOfDifferentBooks: Int): BigDecimal = numberOfDifferentBooks match {
-    case 5 => price * 0.75
-    case 4 => price * 0.8
-    case 3 => price * 0.9
-    case 2 => price * 0.95
-    case _ => price * 1.0
-  }
+}
+
+def format(runningTotal: BigDecimal): Double = {
+  runningTotal.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+}
+
+private val price: BigDecimal = 8
 }
