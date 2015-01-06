@@ -20,4 +20,19 @@ class AcceptanceTest extends org.scalatest.FunSuite {
     val basket: List[Int] = 1 :: 1 :: 1 :: 1 :: 1 :: Nil
     assert(30 === PricingService.price(basket))
   }
+
+  test("If you buy 4 different books you get a 20% discount") {
+    val basket: List[Int] = 1 :: 1 :: 1 :: 1 :: Nil
+    assert(32 - 6.40 === PricingService.price(basket))
+  }
+
+  test("If you buy 3 different books you get a 10% discount") {
+    val basket: List[Int] = 1 :: 1 :: 1 :: Nil
+    assert(24 - 2.40 === PricingService.price(basket))
+  }
+
+  test("If you buy 2 different books you get a 5% discount") {
+    val basket: List[Int] = 1 :: 1 :: Nil
+    assert(16 - 0.80 === PricingService.price(basket))
+  }
 }
