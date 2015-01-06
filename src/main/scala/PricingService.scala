@@ -1,20 +1,26 @@
+import scala.annotation.tailrec
 
 object PricingService {
+  private val price = 8
   def price(basket: List[Int]): Double = {
-    if (basket.isEmpty)
-      0
-    else applyDiscount(total(basket), basket.size)
+    totUp(0, basket, basket.size)
   }
 
-  def total(basket: List[Int]): Int = {
-    basket.foldLeft(0)((acc, copies) => acc + (copies * 8))
+  @tailrec
+  def totUp(runningTotal: BigDecimal, basket: List[Int], numberOfDifferentBooks: Int) :Double = {
+    if(basket.isEmpty)
+      runningTotal.setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+    else {
+      val result: BigDecimal = ((basket.head - 1) * price) + (1 * discountedPrice(numberOfDifferentBooks))
+      totUp(runningTotal + result, basket.tail, numberOfDifferentBooks)
+    }
   }
-
-  def applyDiscount(total: Int, numberOfDifferentBooks: Int) = numberOfDifferentBooks match {
-    case 5 => total * 0.75
-    case 4 => total * 0.8
-    case 3 => total * 0.9
-    case 2 => total * 0.95
-    case _ => total * 1.0
+  
+  def discountedPrice(numberOfDifferentBooks: Int): BigDecimal = numberOfDifferentBooks match {
+    case 5 => price * 0.75
+    case 4 => price * 0.8
+    case 3 => price * 0.9
+    case 2 => price * 0.95
+    case _ => price * 1.0
   }
 }
